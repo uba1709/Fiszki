@@ -5,13 +5,6 @@
   --foreground: #171717;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
@@ -19,8 +12,126 @@
   }
 }
 
+html, body {
+   height: 100%; 
+}
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: monospace;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
+
+
+main { flex: 1; }
+
+
+
+
+
+.flex{
+  display: flex;
+}
+.containerNav{
+  border-bottom: 1px solid #9c9c9c;
+  box-shadow: 10px 10px 15px #0a0a0a ;
+  height: 60px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+.nav-actions{
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.nav_LogIn-Button a{
+  padding: 5px 10px;
+  border-radius: 10px;
+  color: #ededed;
+  transition: all 0.3s ease;
+}
+.nav_LogIn-Button a:hover{
+  background-color: #edededa3;
+  color: #171717;
+}
+.nav_SignUp-Button a{
+  padding: 5px 10px;
+  border-radius: 10px;
+  color: #171717;
+  background-color: #ededed;
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+}
+.nav_SignUp-Button a:hover{
+  background-color: #00b7ff;
+  border: 1px solid #0a0a0a;
+}
+
+.container {
+  display: flex;
+  flex-direction: column; 
+  align-items: center;
+  gap: 12px; 
+  padding: 5px 0;
+  font-size: 1.4rem;
+  width: auto;
+  height: auto;
+  max-height: 110px;
+  border: 1px solid white;
+  margin: auto;
+}
+.typewriter-js {
+  display: inline-block;
+  white-space: nowrap;
+}
+.typewriter-caret {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: currentColor;
+  margin-left: 6px;
+  vertical-align: bottom;
+  animation: blink .7s step-end infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+.aboutWeb{
+  border: 1px solid white;
+  margin: 40px auto;
+  width: 100vh;
+  height: 40vh;
+}
+
+footer{
+  border-top: 1px solid #9c9c9c;
+  box-shadow: 10px 10px 15px #0a0a0a ;
+  height: 60px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+  margin-top: auto;
+  padding: 16px 20px;
+  color: var(--foreground);
+}
+footer p, footer ul {
+   margin: 0; 
+}
+footer ul { 
+  list-style: none; display: flex; gap: 12px; padding: 0; margin-top: 8px; 
+}
+footer a { 
+  color: inherit; 
+  text-decoration: none; 
+}
+
+
+
+

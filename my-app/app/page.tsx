@@ -1,10 +1,13 @@
-import Image from "next/image";
-import header from "./headerSection/header";
+import React from 'react';
+import Header from "./header/header";
+import Main from "./main/main";
+import Footer from './footer/footer';
 export default function Home() {
-  
   return (
     <>
-      <header />
+      <Header />
+      <Main />
+      <Footer />
     </>
   );
 }
