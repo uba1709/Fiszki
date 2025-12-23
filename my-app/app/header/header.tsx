@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 export default function Header() {
   const [open, setOpen] = useState(false);
   const [signOpen, setSignOpen] = useState(false);
+  const [user, setUser] = useState<number | null>(null);
   const usernameRef = useRef<HTMLInputElement | null>(null);
   const signUsernameRef = useRef<HTMLInputElement | null>(null);
 
@@ -21,18 +22,90 @@ export default function Header() {
     return () => document.removeEventListener('keydown', onKey);
   }, [open, signOpen]);
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  // check session on mount
+  useEffect(() => {
+    fetch('me.php', { credentials: 'include' })
+      .then(res => res.json())
+      .then(data => { if (data.logged) setUser(data.userId); })
+      .catch(() => {});
+  }, []);
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
-    console.log('Login attempt', { username: form.get('username'), password: form.get('password') });
-    setOpen(false);
+    const data = { email: form.get('username'), password: form.get('password') };
+
+    try {
+      const res = await fetch('login.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // important to receive session cookie
+        body: JSON.stringify(data),
+      });
+      const result = await res.json();
+      if (result.ok) {
+        setUser(result.userId);
+        setOpen(false);
+      } else {
+        alert(result.error || 'Błąd logowania');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Błąd sieci');
+    }
   }
 
-  function handleSignUpSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSignUpSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
-    console.log('Sign up attempt', { name: form.get('name'), email: form.get('email') });
-    setSignOpen(false);
+    const name = form.get('name');
+    const email = form.get('email');
+    const password = form.get('password');
+    const passwordConfirm = form.get('passwordConfirm');
+
+    if (password !== passwordConfirm) {
+      alert('Hasła nie są takie same');
+      return;
+    }
+
+    try {
+      const res = await fetch('register.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email, password })
+      });
+      const result = await res.json();
+      if (res.status === 201 && result.ok) {
+        // automatically log in the user by calling login
+        const loginRes = await fetch('login.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ email, password })
+        });
+        const loginJson = await loginRes.json();
+        if (loginJson.ok) {
+          setUser(loginJson.userId);
+          setSignOpen(false);
+        }
+      } else {
+        alert(result.error || 'Błąd rejestracji');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Błąd sieci');
+    }
+  }
+
+  async function handleLogout() {
+    try {
+      const res = await fetch('logout.php', { method: 'POST', credentials: 'include' });
+      const data = await res.json();
+      if (data.ok) setUser(null);
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   return (
@@ -46,26 +119,35 @@ export default function Header() {
           </div>
 
           <div className="nav-actions">
-            <div className="nav_LogIn-Button">
-              <a
-                className="nav-btn"
-                onClick={() => { setOpen(true); setSignOpen(false); }}
-                aria-expanded={open}
-                aria-controls="login-panel"
-              >
-                Log in
-              </a>
-            </div>
-            <div className="nav_SignUp-Button">
-              <a
-                className="nav-btn"
-                onClick={() => { setSignOpen(true); setOpen(false); }}
-                aria-expanded={signOpen}
-                aria-controls="signup-panel"
-              >
-                Sign up
-              </a>
-            </div>
+            {user ? (
+              <>
+                <span className="nav-user">Użytkownik #{user}</span>
+                <button className="nav-btn" onClick={handleLogout}>Wyloguj</button>
+              </>
+            ) : (
+              <>
+                <div className="nav_LogIn-Button">
+                  <a
+                    className="nav-btn"
+                    onClick={() => { setOpen(true); setSignOpen(false); }}
+                    aria-expanded={open}
+                    aria-controls="login-panel"
+                  >
+                    Log in
+                  </a>
+                </div>
+                <div className="nav_SignUp-Button">
+                  <a
+                    className="nav-btn"
+                    onClick={() => { setSignOpen(true); setOpen(false); }}
+                    aria-expanded={signOpen}
+                    aria-controls="signup-panel"
+                  >
+                    Sign up
+                  </a>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -85,7 +167,7 @@ export default function Header() {
           <button className="panel-close" aria-label="Zamknij" onClick={() => setOpen(false)}>×</button>
         </div>
 
-        <form className="login-form" onSubmit={handleSubmit}>
+        <form action={'login.php'} className="login-form" onSubmit={handleSubmit}>
           <input name="username" ref={usernameRef} placeholder="Email lub użytkownik" autoComplete="username" />
           <input name="password" type="password" placeholder="Hasło" autoComplete="current-password" />
 

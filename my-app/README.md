@@ -34,3 +34,45 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+---
+
+## PHP auth backend (lokalnie)
+
+W repozytorium znajduje się prosty, lokalny backend w PHP w `app/header/` (pliki: `db.php`, `register.php`, `login.php`, `logout.php`, `me.php`). Poniżej minimalne kroki uruchomienia i wskazówki:
+
+1) Uruchom wbudowany serwer PHP z katalogu projektu:
+
+```bash
+# serwuje pliki pod http://localhost:8000
+php -S localhost:8000 -t .
+```
+
+2) Baza (SQLite) — utwórz plik i zastosuj migrację:
+
+```bash
+# utwórz plik DB i załaduj migrację
+# (w katalogu projektu)
+touch database.sqlite
+sqlite3 database.sqlite < migrations/create_users.sql
+```
+
+Dla MySQL utwórz bazę i uruchom SQL z `migrations/create_users.sql` (sekcja MySQL w pliku). Ustaw wówczas zmienne środowiskowe:
+
+- `DB_TYPE=mysql`
+- `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASS`
+
+Możesz też ustawić `DB_DSN` bezpośrednio.
+
+3) Upewnij się, że frontend wysyła żądania do odpowiedniego miejsca:
+
+- Jeśli PHP działa na tym samym hoście/porcie co frontend, relatywne ścieżki (`login.php`, `register.php`, `me.php`) będą działać.
+- Jeśli PHP działa na innym porcie (np. `http://localhost:8000`), zaktualizuj URL w `app/header/header.tsx` (np. `http://localhost:8000/app/header/login.php`) lub skonfiguruj proxy/rewrites w `next.config.js`.
+
+4) Bezpieczeństwo (ważne dla produkcji):
+
+- Użyj HTTPS i ustaw ciasteczka sesji z `Secure` i `HttpOnly`.
+- Ogranicz dozwolone pochodzenie w CORS (nie używaj `*` w prod).
+- Dodaj rate limiting, zabezpieczenia CSRF, walidację i logowanie zdarzeń.
+
+---
